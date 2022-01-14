@@ -7,13 +7,12 @@ import numpy as np
 from itertools import groupby
 from collections import Counter
 
-WORD_LENGTH = 5
-FIRST_WORD = np.array(list('adieu'))
-
 class Worlde():
     
-    def __init__(self, all_words):
+    def __init__(self, all_words, word_length=5, first_word='adieu'):
         self.all_words = all_words
+        self.word_length = word_length
+        self.first_word = np.array(list(first_word))
         self.num_guesses = []
 
     def delete_from_word(self, word, letter):
@@ -41,7 +40,7 @@ class Worlde():
         present_letters = last_word[matches != 0]
         for i, (letter, match) in enumerate(zip(last_word, matches)):
             if match == 0 and letter not in present_letters:
-                for j in range(5):
+                for j in range(self.word_length):
                     if letter in possible_letters[j]:
                         possible_letters[j].remove(letter)
             elif match == 1 or (match == 0 and letter in present_letters):
@@ -91,11 +90,13 @@ class Worlde():
         print(f'Longest Streak: {longest_streak}')
 
     def play(self):
-        # a 2D array representing the possible letters in each of the 5 positions
-        possible_letters = np.array(list('qwertyuiopasdfghjklzxcvbnm') * 5).reshape(5, 26).tolist()
+        # a 2D array representing the possible letters in each of the letter positions
+        possible_letters = np.array(
+            list('qwertyuiopasdfghjklzxcvbnm') * self.word_length
+        ).reshape(self.word_length, 26).tolist()
         puzzle_word = random.choice(all_words)
 
-        guess_word = FIRST_WORD
+        guess_word = self.first_word
         possible_words = self.all_words
         i = 1
         while True:
@@ -111,9 +112,8 @@ class Worlde():
 
 
 all_words = np.load('dictionary.npy')
-letter_scores = [Counter([word[i] for word in all_words]) for i in range(5)]
 wordle = Worlde(all_words)
 
-for i in range(50000):
+for i in range(100):
     wordle.play()
 wordle.calc_stats()
